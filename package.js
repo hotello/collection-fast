@@ -2,9 +2,9 @@ Package.describe({
   name: 'hotello:collection-fast',
   version: '0.0.1',
   // Brief, one-line summary of the package.
-  summary: '',
+  summary: 'Get a collection, fast!',
   // URL to the Git repository containing the source code for this package.
-  git: '',
+  git: 'https://github.com/hotello/collection-fast.git',
   // By default, Meteor will default to using README.md for documentation.
   // To avoid submitting documentation, set this field to null.
   documentation: 'README.md'
@@ -16,7 +16,7 @@ Package.onUse(function(api) {
     'meteor-base@1.0.4',
     'mobile-experience@1.0.4',
     'mongo@1.1.14',
-    'blaze-html-templates',
+    'blaze-html-templates@1.0.5',
     'reactive-var@1.0.11',
     'reactive-dict@1.1.8',
     'jquery@1.11.10',
@@ -35,11 +35,11 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   api.use([
-    'ecmascript',
-    'practicalmeteor:mocha',
+    'ecmascript@0.6.1',
+    'practicalmeteor:mocha@2.4.5_6',
     'dburles:factory@1.1.0',
-    'johanbrook:publication-collector'
+    'johanbrook:publication-collector@1.0.5'
   ]);
   api.use('hotello:collection-fast');
-  api.mainModule('collection-fast-tests.js');
+  // api.mainModule('collection-fast-tests.js');
 });

@@ -1,9 +1,10 @@
 import { Template } from 'meteor/templating';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
+import { Mongo } from 'meteor/mongo';
 
-import './document.html';
+import './form-update.html';
 
-Template.Document.onCreated(function() {
+Template.Form_update.onCreated(function() {
   this.getCollection = () => Template.currentData().collection;
   this.getDocumentId = () => Template.currentData().documentId;
   this.autorun(() => {
@@ -16,9 +17,21 @@ Template.Document.onCreated(function() {
     this.subscribe(`${collection._name}.single`, this.getDocumentId());
   });
 });
-Template.Document.helpers({
-  document(documentId) {
+Template.Form_update.helpers({
+  schema() {
+    const instance = Template.instance();
+    return instance.getCollection().methodsSchema();
+  },
+  id() {
+    const instance = Template.instance();
+    return instance.getCollection()._name + '.forms.update';
+  },
+  getDoc(documentId) {
     const instance = Template.instance();
     return instance.getCollection().findOne(documentId);
+  },
+  meteormethod() {
+    const instance = Template.instance();
+    return instance.getCollection()._name + '.update';
   }
 });

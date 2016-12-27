@@ -1,0 +1,10 @@
+<template name="Form_update">
+  {{> quickForm
+    schema=schema
+    id=id
+    doc=(getDoc documentId)
+    type="method-update"
+    meteormethod=meteormethod
+    singleMethodArgument=true
+  }}
+</template>

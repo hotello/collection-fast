@@ -120,6 +120,7 @@ export class CollectionFast extends Mongo.Collection {
       throw new Meteor.Error('collectionFast._setupMethods',
         'Must provide an array of fields for methods in options');
     }
+    this.pickForMethods = pickForMethods;
     // setup methods object
     this.methods = {};
     // name of the collection
@@ -129,18 +130,21 @@ export class CollectionFast extends Mongo.Collection {
       docId: {type: String, regEx: SimpleSchema.RegEx.Id}
     });
     // pick some field of the schema for methods
-    this.methodsSchema = this.simpleSchema().pick(pickForMethods);
+    this.methodsSchema = function() {
+      return this.simpleSchema().pick(this.pickForMethods);
+    }
     // set this as local
     const self = this;
 
     this.methods.insert = new ValidatedMethod({
       name: `${name}.insert`,
       validate(doc) {
-        self.methodsSchema.validate(doc)
+        self.methodsSchema().validate(doc)
       },
       run(doc) {
+        const context = this;
         // run hooks on insert
-        doc = self.hooks.run(`${name}.methods.insert`, doc);
+        doc = self.hooks.run(`${name}.methods.insert`, { context, doc });
         // insert and return
         return self.insert(doc);
       }
@@ -150,11 +154,12 @@ export class CollectionFast extends Mongo.Collection {
       name: `${name}.update`,
       validate({ _id, modifier }) {
         ID_ONLY.validate({docId: _id});
-        self.methodsSchema.validate(modifier, {modifier: true});
+        self.methodsSchema().validate(modifier, {modifier: true});
       },
       run(params) {
+        const context = this;
         // run hooks on update
-        params = self.hooks.run(`${name}.methods.update`, params);
+        params = self.hooks.run(`${name}.methods.update`, { context, params });
         // update and return
         return self.update(params._id, params.modifier);
       }
@@ -164,8 +169,9 @@ export class CollectionFast extends Mongo.Collection {
       name: `${name}.remove`,
       validate: ID_ONLY.validator(),
       run(params) {
+        const context = this;
         // run hooks on remove
-        params = self.hooks.run(`${name}.methods.remove`, params);
+        params = self.hooks.run(`${name}.methods.remove`, { context, params });
         // remove and return
         return self.remove(params.docId);
       }
@@ -187,6 +193,7 @@ export class CollectionFast extends Mongo.Collection {
       const name = self._name;
 
       Meteor.publish(`${name}.byQuery`, function(queryName, queryParams) {
+        const context = this;
         let queryFn;
         let query;
         // check arguments passed by the client
@@ -195,7 +202,7 @@ export class CollectionFast extends Mongo.Collection {
           queryParams: {type: Object, blackbox: true}
         }).validate({ queryName, queryParams });
         // run hooks
-        queryParams = self.hooks.run(`${name}.publish.byQuery`, queryParams);
+        queryParams = self.hooks.run(`${name}.publish.byQuery`, { context, queryParams });
         // get the query from the queries dict; if we define the query on the server
         // we can exclude malicious queries, we use a function to integrate dynamic data
         // from the publication.
@@ -204,6 +211,18 @@ export class CollectionFast extends Mongo.Collection {
         query = queryFn(queryParams);
         // return the found cursor
         return self.find(query.selector, query.options);
+      });
+
+      Meteor.publish(`${name}.single`, function(documentId) {
+        const context = this;
+        // check arguments passed by the client
+        new SimpleSchema({
+          documentId: {type: String, regEx: SimpleSchema.RegEx.Id}
+        }).validate({ documentId });
+        // run hooks
+        documentId = self.hooks.run(`${name}.publish.single`, { context, documentId });
+        // return the found cursor
+        return self.find();
       });
     }
   }

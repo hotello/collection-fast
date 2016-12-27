@@ -18,7 +18,7 @@ Template.List.onCreated(function() {
   }
   // get cursor results
   this.getCursor = (queryInput) => {
-    const queryFn = queries.get(queryInput.name);
+    const queryFn = this.getCollection().queries.get(queryInput.name);
     const query = queryFn(queryInput.params);
     const collection = this.getCollection();
     return collection.find(query.selector, query.options);
