@@ -54,7 +54,7 @@ describe('insert/update/upsert/delete', function() {
 });
 
 describe('methods', function() {
-  let methodInvocation = {data: 'document'};
+  let methodInvocation = {userId: 'random_id'};
 
   beforeEach(function() {
     if (Meteor.isServer) {

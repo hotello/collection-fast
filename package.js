@@ -1,6 +1,6 @@
 Package.describe({
   name: 'hotello:collection-fast',
-  version: '0.0.1',
+  version: '1.0.0',
   // Brief, one-line summary of the package.
   summary: 'Get a collection, fast!',
   // URL to the Git repository containing the source code for this package.
@@ -41,5 +41,5 @@ Package.onTest(function(api) {
     'johanbrook:publication-collector@1.0.5'
   ]);
   api.use('hotello:collection-fast');
-  // api.mainModule('collection-fast-tests.js');
+  api.mainModule('collection-fast-tests.js');
 });
