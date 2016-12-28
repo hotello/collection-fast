@@ -1,1 +1,1 @@
-meteor test-packages ./ --driver-package practicalmeteor:mocha
+meteor test-packages --driver-package practicalmeteor:mocha

@@ -27,7 +27,9 @@ Package.onUse(function(api) {
     'aldeed:simple-schema@1.5.3',
     'aldeed:collection2@2.10.0',
     'aldeed:autoform@5.8.1',
-    'mdg:validated-method@1.1.0'
+    'mdg:validated-method@1.1.0',
+
+    'hotello:useful-dicts@1.0.1'
   ]);
   api.mainModule('collection-fast.js');
   api.addFiles('client/index.js', 'client');

@@ -17,8 +17,8 @@ Template.Document.onCreated(function() {
   });
 });
 Template.Document.helpers({
-  document(documentId) {
+  document() {
     const instance = Template.instance();
-    return instance.getCollection().findOne(documentId);
+    return instance.getCollection().findOne(instance.getDocumentId());
   }
 });

@@ -1,9 +1,13 @@
 import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
 import { assert } from 'meteor/practicalmeteor:chai';
 import { _ } from 'meteor/underscore';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { Factory } from 'meteor/dburles:factory';
 import { PublicationCollector } from 'meteor/johanbrook:publication-collector';
+import { Template } from 'meteor/templating';
+import { Blaze } from 'meteor/blaze';
+import { Tracker } from 'meteor/tracker';
 
 import { CollectionFast } from 'meteor/hotello:collection-fast';
 
@@ -26,6 +30,11 @@ describe('schema', function() {
   it('should extend the schema of a collection', function() {
     Documents.extendSchema({field2: {type: String, optional: true}});
     assert.property(Documents.simpleSchema().schema(), 'field2');
+  });
+
+  it('should extend the schema for methods', function() {
+    Documents.pickForMethods.push('field2');
+    assert.property(Documents.methodsSchema().schema(), 'field2');
   });
 });
 
@@ -54,7 +63,7 @@ describe('insert/update/upsert/delete', function() {
 });
 
 describe('methods', function() {
-  let methodInvocation = {userId: 'random_id'};
+  let methodInvocation = {userId: Random.id()};
 
   beforeEach(function() {
     if (Meteor.isServer) {
@@ -98,6 +107,17 @@ describe('publications', function() {
       // collect publication result
       collector.collect('documents.byQuery', 'documents.testQuery', {selector: {}, skip: 1}, (collections) => {
         assert.equal(collections.documents.length, 1);
+        done();
+      });
+    });
+
+    it('should send a single document', function (done) {
+      const collector = new PublicationCollector();
+      const document = Factory.create('document');
+      const documentTwo = Factory.create('document');
+      collector.collect('documents.single', document._id, (collections) => {
+        assert.equal(collections.documents.length, 1);
+        assert.equal(collections.documents[0]._id, document._id);
         done();
       });
     });

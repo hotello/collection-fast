@@ -11,7 +11,6 @@ import './list.html';
 Template.List.onCreated(function() {
   // get data from template
   this.getCollection = () => Template.currentData().collection;
-  this.getSubscription = () => Template.currentData().subscription;
   this.getQuery = () => Template.currentData().query;
   this.getPerPage = (query) => {
     return _.has(query.params, 'perPage') ? query.params.perPage : 10;
@@ -32,17 +31,18 @@ Template.List.onCreated(function() {
   this.autorun(() => {
     new SimpleSchema({
       collection: {type: Mongo.Collection},
-      subscription: {type: String},
       query: {type: Object},
       'query.name': {type: String},
       'query.params': {type: Object, blackbox: true}
     }).validate(Template.currentData());
+    // set variables
+    const collection = this.getCollection();
     const name = this.getQuery().name;
     const params = this.getQuery().params;
     // set the limit from the state for pagination
     params.limit = this.state.get('requestedDocuments');
     // subscribe to posts passing the query name
-    this.subscribe(this.getSubscription(), name, params);
+    this.subscribe(`${collection._name}.byQuery`, name, params);
   });
 });
 Template.List.helpers({

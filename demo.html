@@ -1,0 +1,47 @@
+<body>
+  <h1>Welcome to my blog.</h1>
+  <h2>Add a post!</h2>
+  {{> Posts_form_insert}}
+  <h2>Last post</h2>
+  {{> Posts_item_container}}
+  <h2>Latest posts</h2>
+  {{> Posts_list_container}}
+</body>
+
+<template name="Posts_form_insert">
+  {{> Form_insert collection=posts}}
+</template>
+
+<template name="Posts_list_container">
+  {{#List collection=posts query=query}}
+    {{> Posts_list listArgs}}
+  {{/List}}
+</template>
+
+<template name="Posts_list">
+  {{#each document in documents}}
+    <p>{{document.title}}</p>
+  {{/each}}
+  {{#if noResults}}
+    <p>No posts.</p>
+  {{/if}}
+  {{#if loading}}
+    <p>Loading...</p>
+  {{/if}}
+  <button class="js-load-more">Load more...</button>
+</template>
+
+<template name="Posts_item_container">
+  {{#if Template.subscriptionsReady}}
+    {{#Document collection=posts documentId=randomPostId}}
+      {{> Posts_item post=document}}
+    {{/Document}}
+  {{/if}}
+</template>
+
+<template name="Posts_item">
+  <h4>{{post.title}}</h4>
+  <p>{{post.body}}</p>
+  <strong>You can edit it!</strong>
+  {{> Form_update collection=posts documentId=post._id}}
+</template>
