@@ -2,7 +2,7 @@
 
 > Give me a collection, fast!!!
 
-Generate a collection with *methods*, flexible *publications*, *forms* and *smart components*, for people that have no time to loose.
+Generate a collection with *methods*, flexible *publications*, *forms* and *smart Blaze components*, for people that have no time to loose.
 
 Under the hood everything is done following the [Meteor guide](https://guide.meteor.com/). Look at the source code, isn't it familiar?
 
@@ -33,37 +33,37 @@ you can set an unlimited amount of functions to alter that data and to prepare y
 ```js
 // executed before insert
 Posts.hooks.add('posts.insert.before', function(post) {
-	// do what you want with that post
-	post.body = 'It\'s nice to be a post!';
-	// remember to always return the same thing you received
-	return post;
+  // do what you want with that post
+  post.body = 'It\'s nice to be a post!';
+  // remember to always return the same thing you received
+  return post;
 }
 ```
 Many hooks are available:
 ```js
 Posts.hooks.add('posts.insert.after', function(postId) {
-	// now your post will have an _id property
-	return postId;
+  // now your post will have an _id property
+  return postId;
 });
 
 Posts.hooks.add('posts.update.before', function({ selector, modifier, options }) {
-	// some es6 sintax is used to make clear what is passed to the function
-	return { selector, modifier, options };
+  // some es6 sintax is used to make clear what is passed to the function
+  return { selector, modifier, options };
 });
 Posts.hooks.add('posts.update.after', function({ result, selector, modifier, options }) {
-	// some es6 sintax is used to make clear what is passed to the function
-	return { result, selector, modifier, options };
+  // some es6 sintax is used to make clear what is passed to the function
+  return { result, selector, modifier, options };
 });
 
 // NOTE: upsert has the same behaviour as update.
 
 Posts.hooks.add('posts.remove.before', function(selector) {
-	// do something before removing your document
-	return selector;
+  // do something before removing your document
+  return selector;
 });
 Posts.hooks.add('posts.remove.after', function({ result, selector }) {
-	// now your post will have an _id property
-	return { result, selector };
+  // now your post will have an _id property
+  return { result, selector };
 });
 ```
 ### Extendable schema, even for methods

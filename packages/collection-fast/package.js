@@ -1,8 +1,8 @@
 Package.describe({
   name: 'hotello:collection-fast',
-  version: '1.0.3',
+  version: '1.0.4',
   // Brief, one-line summary of the package.
-  summary: 'Methods, publications, forms and lists in seconds.',
+  summary: 'Methods, publications, forms and smart components in seconds.',
   // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/hotello/collection-fast.git',
   // By default, Meteor will default to using README.md for documentation.
