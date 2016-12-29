@@ -2,9 +2,11 @@
 
 > Give me a collection, fast!!!
 
-Generate a collection with *methods*, flexible *publications*, *forms* and *paginated lists*, for people that have no time to loose.
+Generate a collection with *methods*, flexible *publications*, *forms* and *smart components*, for people that have no time to loose.
 
 Under the hood everything is done following the [Meteor guide](https://guide.meteor.com/). Look at the source code, isn't it familiar?
+
+To see it in action have a look to [gyroscope](https://github.com/hotello/gyroscope).
 ## Define the collection
 ```js
 import { CollectionFast } from 'meteor/hotello:collection-fast';
@@ -19,7 +21,7 @@ const Posts = new CollectionFast('posts', {
 ```
 Note that the **schema** is a *SimpleSchema*, use exactly any SimpleSchema schema you like.
 
-For methods we usually use only some fields of the schema, **pickForMethods** defines which field we want to allow from the client.
+For methods we usually use only some fields of the schema, **pickForMethods** defines which fields we want to allow from the client.
 Under the hood the *.pick()* method of SimpleSchema is used, refer to its documentation for more.
 ## What did I get for free?
 ### Hooks on insert, update, upsert and delete
@@ -27,7 +29,7 @@ Now when you do one of the above actions like:
 ```js
 Posts.insert({title: 'Hello World!'});
 ```
-you can set an unlimited amount of functions to alter that data and to prepare your documents to be inserted or updated in the database. You can set those hooks everywhere you want.
+you can set an unlimited amount of functions to alter that data and to prepare your documents to be inserted or updated in the database. You can set those hooks everywhere you want. Refer to [useful-dicts](https://github.com/hotello/useful-dicts) docs for more.
 ```js
 // executed before insert
 Posts.hooks.add('posts.insert.before', function(post) {
