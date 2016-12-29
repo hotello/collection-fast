@@ -87,8 +87,8 @@ describe('methods', function() {
   });
 
   it('should remove documents', function() {
-    const docId = Factory.create('document')._id;
-    const result = Documents.methods.remove._execute(methodInvocation, { docId });
+    const documentId = Factory.create('document')._id;
+    const result = Documents.methods.remove._execute(methodInvocation, documentId);
 
     assert.equal(result, 1);
   });

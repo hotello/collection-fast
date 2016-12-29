@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { _ } from 'meteor/underscore';
 import { CollectionFast } from 'meteor/hotello:collection-fast';
 
-export const Posts = new CollectionFast('posts', {
+const Posts = new CollectionFast('posts', {
   schema: {
     title: {type: String},
     body: {type: String}

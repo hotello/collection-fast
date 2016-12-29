@@ -46,25 +46,33 @@ export class CollectionFast extends Mongo.Collection {
   }
   update(selector, modifier, options, callback) {
     let result;
-    let hr;
+    let hookResult;
     // run before hooks
-    hr = this.hooks.run(`${this._name}.update.before`, { selector, modifier, options });
+    hookResult = this.hooks.run(`${this._name}.update.before`, { selector, modifier, options });
+    // override
+    selector = hookResult.selector;
+    modifier = hookResult.modifier;
+    options = hookResult.options;
     // run insert
-    result = super.update(hr.selector, hr.modifier, hr.options);
+    result = super.update(selector, modifier, options, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.update.after`, hr.selector);
+    this.hooks.run(`${this._name}.update.after`, { result, selector, modifier, options });
     // return
     return result;
   }
   upsert(selector, modifier, options, callback) {
     let result;
-    let hr;
+    let hookResult;
     // run before hooks
-    hr = this.hooks.run(`${this._name}.upsert.before`, { selector, modifier, options });
+    hookResult = this.hooks.run(`${this._name}.upsert.before`, { selector, modifier, options });
+    // override
+    selector = hookResult.selector;
+    modifier = hookResult.modifier;
+    options = hookResult.options;
     // run insert
-    result = super.upsert(hr.selector, hr.modifier, hr.options);
+    result = super.upsert(selector, modifier, options, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.upsert.after`, hr.selector);
+    this.hooks.run(`${this._name}.upsert.after`, { result, selector, modifier, options });
     // return
     return result;
   }
@@ -75,7 +83,7 @@ export class CollectionFast extends Mongo.Collection {
     // run insert
     result = super.remove(selector, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.remove.after`, selector);
+    this.hooks.run(`${this._name}.remove.after`, { result, selector });
     // return
     return result;
   }
@@ -127,7 +135,7 @@ export class CollectionFast extends Mongo.Collection {
     const name = this._name;
     // accept only ids
     const ID_ONLY = new SimpleSchema({
-      docId: {type: String, regEx: SimpleSchema.RegEx.Id}
+      _id: {type: String, regEx: SimpleSchema.RegEx.Id}
     });
     // pick some field of the schema for methods
     this.methodsSchema = function() {
@@ -153,7 +161,7 @@ export class CollectionFast extends Mongo.Collection {
     this.methods.update = new ValidatedMethod({
       name: `${name}.update`,
       validate({ _id, modifier }) {
-        ID_ONLY.validate({docId: _id});
+        ID_ONLY.validate({_id: _id});
         self.methodsSchema().validate(modifier, {modifier: true});
       },
       run(params) {
@@ -167,13 +175,15 @@ export class CollectionFast extends Mongo.Collection {
 
     this.methods.remove = new ValidatedMethod({
       name: `${name}.remove`,
-      validate: ID_ONLY.validator(),
-      run(params) {
+      validate(_id) {
+        ID_ONLY.validate({ _id });
+      },
+      run(_id) {
         const context = this;
         // run hooks on remove
-        const result = self.hooks.run(`${name}.methods.remove`, { context, params });
+        const result = self.hooks.run(`${name}.methods.remove`, { context, _id });
         // remove and return
-        return self.remove(result.params.docId);
+        return self.remove(result._id);
       }
     });
   }
@@ -189,41 +199,41 @@ export class CollectionFast extends Mongo.Collection {
    // setup publications
   _setupPublications() {
     const self = this;
-    const name = self._name;
+    const collectionName = self._name;
 
-    Meteor.publish(`${name}.byQuery`, function(queryName, queryParams) {
+    Meteor.publish(`${collectionName}.byQuery`, function(name, params) {
       const context = this;
       let queryFn;
       let query;
       // check arguments passed by the client
       new SimpleSchema({
-        queryName: {type: String},
-        queryParams: {type: Object, blackbox: true}
-      }).validate({ queryName, queryParams });
+        name: {type: String},
+        params: {type: Object, blackbox: true}
+      }).validate({ name, params });
       // run hooks
-      const result = self.hooks.run(`${name}.publish.byQuery`, { context, queryParams });
+      const result = self.hooks.run(`${collectionName}.publish.byQuery`, { context, name, params });
       // update queryParams
-      queryParams = result.queryParams;
+      params = result.params;
       // get the query from the queries dict; if we define the query on the server
       // we can exclude malicious queries, we use a function to integrate dynamic data
       // from the publication.
-      queryFn = self.queries.get(queryName);
+      queryFn = self.queries.get(name);
       // run query function to get the actual query
-      query = queryFn(queryParams);
+      query = queryFn(params);
       // return the found cursor
       return self.find(query.selector, query.options);
     });
 
-    Meteor.publish(`${name}.single`, function(documentId) {
+    Meteor.publish(`${collectionName}.single`, function(_id) {
       const context = this;
       // check arguments passed by the client
       new SimpleSchema({
-        documentId: {type: String, regEx: SimpleSchema.RegEx.Id}
-      }).validate({ documentId });
+        _id: {type: String, regEx: SimpleSchema.RegEx.Id}
+      }).validate({ _id });
       // run hooks
-      const result = self.hooks.run(`${name}.publish.single`, { context, documentId });
+      const result = self.hooks.run(`${collectionName}.publish.single`, { context, _id });
       // return the found cursor
-      return self.find(result.documentId);
+      return self.find(result._id);
     });
   }
 }
