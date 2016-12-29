@@ -40,7 +40,7 @@ export class CollectionFast extends Mongo.Collection {
     // run insert
     result = super.insert(doc, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.insert.after`, result);
+    this.hooks.run(`${this._name}.insert.after`, { result, doc });
     // return
     return result;
   }

@@ -49,9 +49,10 @@ describe('insert/update/upsert/delete', function() {
       assert.property(doc, 'field1');
       return doc;
     });
-    Documents.hooks.add('documents.insert.after', function(docId) {
-      assert.isString(docId);
-      return docId;
+    Documents.hooks.add('documents.insert.after', function({ result, doc }) {
+      assert.isString(result);
+      assert.isObject(doc);
+      return { result, doc };
     });
     assert.isString(Documents.insert(document));
   });

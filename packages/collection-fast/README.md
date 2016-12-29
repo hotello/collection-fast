@@ -41,9 +41,9 @@ Posts.hooks.add('posts.insert.before', function(post) {
 ```
 Many hooks are available:
 ```js
-Posts.hooks.add('posts.insert.after', function(postId) {
+Posts.hooks.add('posts.insert.after', function({ result, doc }) {
   // now your post will have an _id property
-  return postId;
+  return { result, doc };
 });
 
 Posts.hooks.add('posts.update.before', function({ selector, modifier, options }) {
