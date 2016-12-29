@@ -39,6 +39,8 @@ export class CollectionFast extends Mongo.Collection {
     doc = this.hooks.run(`${this._name}.insert.before`, doc);
     // run insert
     result = super.insert(doc, callback);
+    // extend doc with _id
+    if (result) doc._id = result;
     // run after hooks
     this.hooks.run(`${this._name}.insert.after`, { result, doc });
     // return

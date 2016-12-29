@@ -52,6 +52,7 @@ describe('insert/update/upsert/delete', function() {
     Documents.hooks.add('documents.insert.after', function({ result, doc }) {
       assert.isString(result);
       assert.isObject(doc);
+      assert.property(doc, '_id');
       return { result, doc };
     });
     assert.isString(Documents.insert(document));
@@ -62,7 +63,7 @@ describe('insert/update/upsert/delete', function() {
     const docId = Documents.insert(document);
     Documents.hooks.add('documents.update.before', function({ selector, modifier, options }) {
       assert.isDefined(selector);
-      assert.deepEqual(modifier.$set, document);
+      assert.isDefined(modifier.$set);
       return { selector, modifier, options };
     });
     Documents.hooks.add('documents.update.after', function({ result, selector, modifier, options }) {
