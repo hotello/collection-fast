@@ -6,7 +6,7 @@ Generate a collection with *methods*, flexible *publications*, *forms* and *smar
 
 Under the hood everything is done following the [Meteor guide](https://guide.meteor.com/). Look at the source code, isn't it familiar?
 
-To see it in action have a look to [gyroscope](https://github.com/hotello/gyroscope).
+To see it in action have a look at [gyroscope](https://github.com/hotello/gyroscope).
 ## Define the collection
 ```js
 import { CollectionFast } from 'meteor/hotello:collection-fast';
@@ -22,17 +22,17 @@ const Posts = new CollectionFast('posts', {
 Note that the **schema** is a *SimpleSchema*, use exactly any SimpleSchema schema you like.
 
 For methods we usually use only some fields of the schema, **pickForMethods** defines which fields we want to allow from the client.
-Under the hood the *.pick()* method of SimpleSchema is used, refer to its documentation for more.
+Under the hood the *.pick()* method of SimpleSchema instance is used, refer to its documentation for more.
 ## What did I get for free?
 ### Hooks on insert, update, upsert and delete
-Now when you do one of the above actions like:
+Now on:
 ```js
 Posts.insert({title: 'Hello World!'});
 ```
 you can set an unlimited amount of functions to alter that data and to prepare your documents to be inserted or updated in the database. You can set those hooks everywhere you want. Refer to [useful-dicts](https://github.com/hotello/useful-dicts) docs for more.
 ```js
 // executed before insert
-Posts.hooks.add('posts.insert.before', function(post) {
+Posts.hooks.add('insert.before', function(post) {
   // do what you want with that post
   post.body = 'It\'s nice to be a post!';
   // remember to always return the same thing you received
@@ -41,28 +41,27 @@ Posts.hooks.add('posts.insert.before', function(post) {
 ```
 Many hooks are available:
 ```js
-Posts.hooks.add('posts.insert.after', function({ result, doc }) {
+Posts.hooks.add('insert.after', function({ result, doc }) {
   // now your post will have an _id property
   return { result, doc };
 });
 
-Posts.hooks.add('posts.update.before', function({ selector, modifier, options }) {
+Posts.hooks.add('update.before', function({ selector, modifier, options }) {
   // some es6 sintax is used to make clear what is passed to the function
   return { selector, modifier, options };
 });
-Posts.hooks.add('posts.update.after', function({ result, selector, modifier, options }) {
+Posts.hooks.add('update.after', function({ result, selector, modifier, options }) {
   // some es6 sintax is used to make clear what is passed to the function
   return { result, selector, modifier, options };
 });
 
 // NOTE: upsert has the same behaviour as update.
 
-Posts.hooks.add('posts.remove.before', function(selector) {
+Posts.hooks.add('remove.before', function(selector) {
   // do something before removing your document
   return selector;
 });
-Posts.hooks.add('posts.remove.after', function({ result, selector }) {
-  // now your post will have an _id property
+Posts.hooks.add('remove.after', function({ result, selector }) {
   return { result, selector };
 });
 ```
@@ -89,17 +88,17 @@ Meteor.call('posts.remove', post._id, callback);
 ```
 You can set callback also on methods.
 ```js
-Posts.hooks.add('posts.methods.insert', function({ context, doc }) {
+Posts.hooks.add('methods.insert', function({ context, doc }) {
   // 'context' is the usual 'this' you use in methods
   return { context, doc };
 });
 
-Posts.hooks.add('posts.methods.update', function({ context, params }) {
+Posts.hooks.add('methods.update', function({ context, params }) {
   // where params => { _id, modifier }
   return { context, params };
 });
 
-Posts.hooks.add('posts.methods.remove', function({ context, _id }) {
+Posts.hooks.add('methods.remove', function({ context, _id }) {
   return { context, _id};
 });
 ```
@@ -108,12 +107,12 @@ You get two publications, you can subscribe to them as shown here:
 ```js
 Meteor.subscribe('posts.single', post._id);
 
-Meteor.subscribe('posts.byQuery', 'posts.all', params);
+Meteor.subscribe('posts.byQuery', 'all', params);
 ```
-To use the latter you must define one ore more queries. It's important you understand you have to put the code both on server and client. This is for security reasons. You could even *validate* those params with SimpleSchema. That code is used to generate a Mongo query at publication level.
+To use the latter you must define one ore more queries, both on client and server. Queries are a nice way of putting the Mongo query code both on client and server, so the publication will use a query defined on the server, in a safe way. At the same time the client will get exactly what it asked for. You could even *validate* those *params* with SimpleSchema.
 ```js
 Posts.queries.set({
-  'posts.all': function(params) {
+  'all': function(params) {
     return {selector: {}, options: {limit: params.limit}};
   }
 });
@@ -122,16 +121,16 @@ That **params** is used to pass your custom data into the query. Remember to **a
 
 Two hooks are available in publications:
 ```js
-Posts.hooks.add('posts.publish.byQuery', function({ context, name, params }) {
+Posts.hooks.add('publish.byQuery', function({ context, name, params }) {
   return { context, name, params };
 });
 
-Posts.hooks.add('posts.publish.single', function({ context, _id }) {
+Posts.hooks.add('publish.single', function({ context, _id }) {
   return { context, _id };
 });
 ```
 ### Blaze components
-You get *List*, *Document*, *Forminsert*, *Form_update* components. You must define only some helpers, forms will automatically generate via AutoForm. Access AutoForm via id; it is automatically generated as *posts.forms.insert* or *posts.forms.update*.
+You get *List*, *Document*, *Forminsert*, *Form_update* components. You must define only some helpers, forms will automatically generate via AutoForm. Access AutoForm via id. I remeber each AutoForm has an id you can use to access it and it is automatically generated by CollectionFast as *posts.forms.insert* or *posts.forms.update*.
 #### List
 ```html
 <!-- posts-list.html -->
@@ -163,7 +162,7 @@ Template.Posts_list_container.helpers({
   query() {
     // perPage defines the number of elements per page on pagination.
     // It defaults to 10.
-    return {name: 'posts.all', params: {perPage: 5}};
+    return {name: 'all', params: {perPage: 5}};
   }
 });
 

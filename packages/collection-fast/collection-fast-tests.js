@@ -5,9 +5,6 @@ import { _ } from 'meteor/underscore';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { Factory } from 'meteor/dburles:factory';
 import { PublicationCollector } from 'meteor/johanbrook:publication-collector';
-import { Template } from 'meteor/templating';
-import { Blaze } from 'meteor/blaze';
-import { Tracker } from 'meteor/tracker';
 
 import { CollectionFast } from 'meteor/hotello:collection-fast';
 
@@ -15,7 +12,6 @@ const Documents = new CollectionFast('documents', {
   schema: {field1: {type: Boolean, optional: true}},
   pickForMethods: ['field1']
 });
-
 Factory.define('document', Documents, {
   field1: () => true
 });
@@ -45,14 +41,16 @@ describe('insert/update/upsert/delete', function() {
 
   it('should insert doc with hooks', function() {
     const document = Factory.tree('document');
-    Documents.hooks.add('documents.insert.before', function(doc) {
+    Documents.hooks.add('insert.before', function(doc) {
       assert.property(doc, 'field1');
+      console.log('insert.before');
       return doc;
     });
-    Documents.hooks.add('documents.insert.after', function({ result, doc }) {
+    Documents.hooks.add('insert.after', function({ result, doc }) {
       assert.isString(result);
       assert.isObject(doc);
       assert.property(doc, '_id');
+      console.log('insert.after');
       return { result, doc };
     });
     assert.isString(Documents.insert(document));
@@ -61,15 +59,17 @@ describe('insert/update/upsert/delete', function() {
   it('should update doc with hooks', function() {
     const document = Factory.tree('document');
     const docId = Documents.insert(document);
-    Documents.hooks.add('documents.update.before', function({ selector, modifier, options }) {
+    Documents.hooks.add('update.before', function({ selector, modifier, options }) {
       assert.isDefined(selector);
       assert.isDefined(modifier.$set);
+      console.log('update.before');
       return { selector, modifier, options };
     });
-    Documents.hooks.add('documents.update.after', function({ result, selector, modifier, options }) {
+    Documents.hooks.add('update.after', function({ result, selector, modifier, options }) {
       assert.isDefined(result);
       assert.isDefined(selector);
       assert.deepEqual(modifier.$set, document);
+      console.log('update.after');
       return { result, selector, modifier, options };
     });
     assert.equal(Documents.update(docId, {$set: document}), 1);
@@ -78,15 +78,17 @@ describe('insert/update/upsert/delete', function() {
   it('should upsert doc with hooks', function() {
     const document = Factory.tree('document');
     const docId = Documents.insert(document);
-    Documents.hooks.add('documents.upsert.before', function({ selector, modifier, options }) {
+    Documents.hooks.add('upsert.before', function({ selector, modifier, options }) {
       assert.isDefined(selector);
       assert.deepEqual(modifier.$set, document);
+      console.log('upsert.before');
       return { selector, modifier, options };
     });
-    Documents.hooks.add('documents.upsert.after', function({ result, selector, modifier, options }) {
+    Documents.hooks.add('upsert.after', function({ result, selector, modifier, options }) {
       assert.property(result, 'numberAffected');
       assert.isDefined(selector);
       assert.deepEqual(modifier.$set, document);
+      console.log('upsert.after');
       return { result, selector, modifier, options };
     });
     assert.isNumber(Documents.upsert(docId, {$set: document}).numberAffected);
@@ -95,13 +97,15 @@ describe('insert/update/upsert/delete', function() {
   it('should remove doc with hooks', function() {
     const document = Factory.tree('document');
     const docId = Documents.insert(document);
-    Documents.hooks.add('documents.remove.before', function(selector) {
+    Documents.hooks.add('remove.before', function(selector) {
       assert.isDefined(selector);
+      console.log('remove.before');
       return selector;
     });
-    Documents.hooks.add('documents.remove.after', function({ result, selector}) {
+    Documents.hooks.add('remove.after', function({ result, selector}) {
       assert.isNumber(result);
       assert.isDefined(selector);
+      console.log('remove.after');
       return { result, selector };
     });
     assert.equal(Documents.remove(docId), 1);
@@ -119,9 +123,10 @@ describe('methods', function() {
 
   it('should insert documents with hooks', function() {
     const document = Factory.tree('document');
-    Documents.hooks.add('documents.methods.insert', function({ context, doc }) {
+    Documents.hooks.add('methods.insert', function({ context, doc }) {
       assert.property(context, 'userId');
       assert.deepEqual(doc, document);
+      console.log('methods.insert');
       return { context, doc };
     });
     const result = Documents.methods.insert._execute(methodInvocation, document);
@@ -131,11 +136,12 @@ describe('methods', function() {
   it('should update documents', function() {
     const documentId = Factory.create('document')._id;
     const document = Factory.tree('document');
-    Documents.hooks.add('documents.methods.update', function({ context, params }) {
+    Documents.hooks.add('methods.update', function({ context, params }) {
       assert.property(context, 'userId');
       assert.property(params, '_id');
       assert.property(params, 'modifier');
       assert.deepEqual(params.modifier.$set, document);
+      console.log('methods.update');
       return { context, params };
     });
     const result = Documents.methods.update._execute(methodInvocation, {_id: documentId, modifier: {$set: document}});
@@ -144,9 +150,10 @@ describe('methods', function() {
 
   it('should remove documents', function() {
     const documentId = Factory.create('document')._id;
-    Documents.hooks.add('documents.methods.remove', function({ context, _id }) {
+    Documents.hooks.add('methods.remove', function({ context, _id }) {
       assert.property(context, 'userId');
       assert.equal(_id, documentId);
+      console.log('methods.remove');
       return { context, _id };
     });
     const result = Documents.methods.remove._execute(methodInvocation, documentId);
@@ -164,11 +171,12 @@ describe('publications', function() {
       Documents.queries.set({'documents.testQuery': function(params) {
         return {selector: params.selector, options: {skip: params.skip}};
       }});
-      Documents.hooks.add('documents.publish.byQuery', function({ context, name, params }) {
+      Documents.hooks.add('publish.byQuery', function({ context, name, params }) {
         assert.isDefined(context);
         assert.equal(name, 'documents.testQuery');
         assert.property(params, 'selector');
         assert.property(params, 'skip');
+        console.log('publish.byQuery');
         return { context, name, params };
       });
       // collect publication result
@@ -182,9 +190,10 @@ describe('publications', function() {
       const collector = new PublicationCollector();
       const document = Factory.create('document');
       const documentTwo = Factory.create('document');
-      Documents.hooks.add('documents.publish.single', function({ context, _id }) {
+      Documents.hooks.add('publish.single', function({ context, _id }) {
         assert.isDefined(context);
         assert.equal(_id, document._id);
+        console.log('publish.single');
         return { context, _id };
       });
       collector.collect('documents.single', document._id, (collections) => {

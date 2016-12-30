@@ -36,13 +36,13 @@ export class CollectionFast extends Mongo.Collection {
   insert(doc, callback) {
     let result;
     // run before hooks
-    doc = this.hooks.run(`${this._name}.insert.before`, doc);
+    doc = this.hooks.run('insert.before', doc);
     // run insert
     result = super.insert(doc, callback);
     // extend doc with _id
     if (result) doc._id = result;
     // run after hooks
-    this.hooks.run(`${this._name}.insert.after`, { result, doc });
+    this.hooks.run('insert.after', { result, doc });
     // return
     return result;
   }
@@ -50,7 +50,7 @@ export class CollectionFast extends Mongo.Collection {
     let result;
     let hookResult;
     // run before hooks
-    hookResult = this.hooks.run(`${this._name}.update.before`, { selector, modifier, options });
+    hookResult = this.hooks.run('update.before', { selector, modifier, options });
     // override
     selector = hookResult.selector;
     modifier = hookResult.modifier;
@@ -58,7 +58,7 @@ export class CollectionFast extends Mongo.Collection {
     // run insert
     result = super.update(selector, modifier, options, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.update.after`, { result, selector, modifier, options });
+    this.hooks.run('update.after', { result, selector, modifier, options });
     // return
     return result;
   }
@@ -66,7 +66,7 @@ export class CollectionFast extends Mongo.Collection {
     let result;
     let hookResult;
     // run before hooks
-    hookResult = this.hooks.run(`${this._name}.upsert.before`, { selector, modifier, options });
+    hookResult = this.hooks.run('upsert.before', { selector, modifier, options });
     // override
     selector = hookResult.selector;
     modifier = hookResult.modifier;
@@ -74,18 +74,18 @@ export class CollectionFast extends Mongo.Collection {
     // run insert
     result = super.upsert(selector, modifier, options, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.upsert.after`, { result, selector, modifier, options });
+    this.hooks.run('upsert.after', { result, selector, modifier, options });
     // return
     return result;
   }
   remove(selector, callback) {
     let result;
     // run before hooks
-    selector = this.hooks.run(`${this._name}.remove.before`, selector);
+    selector = this.hooks.run('remove.before', selector);
     // run insert
     result = super.remove(selector, callback);
     // run after hooks
-    this.hooks.run(`${this._name}.remove.after`, { result, selector });
+    this.hooks.run('remove.after', { result, selector });
     // return
     return result;
   }
@@ -154,7 +154,7 @@ export class CollectionFast extends Mongo.Collection {
       run(doc) {
         const context = this;
         // run hooks on insert
-        const result = self.hooks.run(`${name}.methods.insert`, { context, doc });
+        const result = self.hooks.run('methods.insert', { context, doc });
         // insert and return
         return self.insert(result.doc);
       }
@@ -169,7 +169,7 @@ export class CollectionFast extends Mongo.Collection {
       run(params) {
         const context = this;
         // run hooks on update
-        const result = self.hooks.run(`${name}.methods.update`, { context, params });
+        const result = self.hooks.run('methods.update', { context, params });
         // update and return
         return self.update(result.params._id, result.params.modifier);
       }
@@ -183,7 +183,7 @@ export class CollectionFast extends Mongo.Collection {
       run(_id) {
         const context = this;
         // run hooks on remove
-        const result = self.hooks.run(`${name}.methods.remove`, { context, _id });
+        const result = self.hooks.run('methods.remove', { context, _id });
         // remove and return
         return self.remove(result._id);
       }
@@ -213,7 +213,7 @@ export class CollectionFast extends Mongo.Collection {
         params: {type: Object, blackbox: true}
       }).validate({ name, params });
       // run hooks
-      const result = self.hooks.run(`${collectionName}.publish.byQuery`, { context, name, params });
+      const result = self.hooks.run('publish.byQuery', { context, name, params });
       // update queryParams
       params = result.params;
       // get the query from the queries dict; if we define the query on the server
@@ -233,7 +233,7 @@ export class CollectionFast extends Mongo.Collection {
         _id: {type: String, regEx: SimpleSchema.RegEx.Id}
       }).validate({ _id });
       // run hooks
-      const result = self.hooks.run(`${collectionName}.publish.single`, { context, _id });
+      const result = self.hooks.run('publish.single', { context, _id });
       // return the found cursor
       return self.find(result._id);
     });
