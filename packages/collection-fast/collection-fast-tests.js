@@ -136,13 +136,13 @@ describe('methods', function() {
   it('should update documents', function() {
     const documentId = Factory.create('document')._id;
     const document = Factory.tree('document');
-    Documents.hooks.add('methods.update', function({ context, params }) {
+    Documents.hooks.add('methods.update', function({ context, _id, modifier }) {
       assert.property(context, 'userId');
-      assert.property(params, '_id');
-      assert.property(params, 'modifier');
-      assert.deepEqual(params.modifier.$set, document);
+      assert.isDefined(_id);
+      assert.isDefined(modifier);
+      assert.deepEqual(modifier.$set, document);
       console.log('methods.update');
-      return { context, params };
+      return { context, _id, modifier };
     });
     const result = Documents.methods.update._execute(methodInvocation, {_id: documentId, modifier: {$set: document}});
     assert.equal(result, 1);

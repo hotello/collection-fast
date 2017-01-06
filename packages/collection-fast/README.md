@@ -93,9 +93,8 @@ Posts.hooks.add('methods.insert', function({ context, doc }) {
   return { context, doc };
 });
 
-Posts.hooks.add('methods.update', function({ context, params }) {
-  // where params => { _id, modifier }
-  return { context, params };
+Posts.hooks.add('methods.update', function({ context, _id, modifier }) {
+  return { context, _id, modifier };
 });
 
 Posts.hooks.add('methods.remove', function({ context, _id }) {

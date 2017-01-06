@@ -166,12 +166,12 @@ export class CollectionFast extends Mongo.Collection {
         ID_ONLY.validate({_id: _id});
         self.methodsSchema().validate(modifier, {modifier: true});
       },
-      run(params) {
+      run({ _id, modifier }) {
         const context = this;
         // run hooks on update
-        const result = self.hooks.run('methods.update', { context, params });
+        const result = self.hooks.run('methods.update', { context, _id, modifier });
         // update and return
-        return self.update(result.params._id, result.params.modifier);
+        return self.update(result._id, result.modifier);
       }
     });
 
