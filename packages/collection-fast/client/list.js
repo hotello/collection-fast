@@ -2,6 +2,7 @@ import { Template } from 'meteor/templating';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Mongo } from 'meteor/mongo';
+import { Counts } from 'meteor/tmeasday:publish-counts';
 
 import './list.html';
 
@@ -12,6 +13,12 @@ Template.List.onCreated(function() {
   // get data from template
   this.getCollection = () => Template.currentData().collection;
   this.getQuery = () => Template.currentData().query;
+  this.getCountId = () => {
+    const collectionName = this.getCollection()._name;
+    const name = this.getQuery().name;
+    const params = this.getQuery().params;
+    return `${collectionName}.byQuery.${name}.${JSON.stringify(params)}`;
+  }
   this.getPerPage = (query) => {
     return _.has(query.params, 'perPage') ? query.params.perPage : 10;
   }
@@ -52,6 +59,7 @@ Template.List.helpers({
       documents: instance.getCursor(query),
       noResults: instance.subscriptionsReady() && instance.getCursor(query).count() === 0,
       loading: !instance.subscriptionsReady(),
+      hasMore: instance.getCursor(query).count() < Counts.get(instance.getCountId()),
       loadMore() {
         const current = instance.state.get('requestedDocuments');
         instance.state.set('requestedDocuments', current + instance.getPerPage(query));

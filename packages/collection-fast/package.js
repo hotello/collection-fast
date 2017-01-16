@@ -1,6 +1,6 @@
 Package.describe({
   name: 'hotello:collection-fast',
-  version: '1.2.0',
+  version: '1.3.0',
   // Brief, one-line summary of the package.
   summary: 'Methods, publications, forms and smart components in seconds.',
   // URL to the Git repository containing the source code for this package.
@@ -14,7 +14,6 @@ Package.onUse(function(api) {
   api.versionsFrom('1.4.2.3');
   api.use([
     'meteor-base@1.0.4',
-    'mobile-experience@1.0.4',
     'mongo@1.1.14',
     'blaze-html-templates@1.0.5',
     'reactive-var@1.0.11',
@@ -28,6 +27,8 @@ Package.onUse(function(api) {
     'aldeed:collection2@2.10.0',
     'aldeed:autoform@5.8.1',
     'mdg:validated-method@1.1.0',
+    'reywood:publish-composite@1.4.2',
+    'tmeasday:publish-counts@0.8.0',
 
     'hotello:useful-dicts@1.0.1'
   ]);

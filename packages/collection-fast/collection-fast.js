@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
+import { Counts } from 'meteor/tmeasday:publish-counts';
 
 import {
   HooksDict,
@@ -194,39 +195,57 @@ export class CollectionFast extends Mongo.Collection {
    * Publications
    */
 
+  // setup publications children
+  setPubsChildren(pubsChildren) {
+    this.pubsChildren = pubsChildren;
+  }
    // setup queries for publications
    _setupQueries(queries = {}) {
      this.queries = new FunctionsDict(queries);
+   }
+   // get current publications children
+   _getPubsChildren() {
+     return this.pubsChildren ;
    }
    // setup publications
   _setupPublications() {
     const self = this;
     const collectionName = self._name;
+    // set publication children default
+    this.pubsChildren = [];
 
-    Meteor.publish(`${collectionName}.byQuery`, function(name, params) {
+    Meteor.publishComposite(`${collectionName}.byQuery`, function(name, params) {
       const context = this;
       let queryFn;
       let query;
+      let result;
+      let countId;
       // check arguments passed by the client
       new SimpleSchema({
         name: {type: String},
         params: {type: Object, blackbox: true}
       }).validate({ name, params });
       // run hooks
-      const result = self.hooks.run('publish.byQuery', { context, name, params });
-      // update queryParams
-      params = result.params;
+      result = self.hooks.run('publish.byQuery', { context, name, params });
       // get the query from the queries dict; if we define the query on the server
       // we can exclude malicious queries, we use a function to integrate dynamic data
       // from the publication.
       queryFn = self.queries.get(name);
-      // run query function to get the actual query
-      query = queryFn(params);
-      // return the found cursor
-      return self.find(query.selector, query.options);
+      // run query function to get the actual query with params got from result
+      query = queryFn(result.params);
+      // publish counts
+      countId = `${collectionName}.byQuery.${name}.${JSON.stringify(params)}`;
+      Counts.publish(this, countId, self.find(), { noReady: true });
+      // return the constructor for publish composite
+      return {
+        find() {
+          return self.find(query.selector, query.options);
+        },
+        children: self._getPubsChildren()
+      };
     });
 
-    Meteor.publish(`${collectionName}.single`, function(_id) {
+    Meteor.publishComposite(`${collectionName}.single`, function(_id) {
       const context = this;
       // check arguments passed by the client
       new SimpleSchema({
@@ -235,7 +254,12 @@ export class CollectionFast extends Mongo.Collection {
       // run hooks
       const result = self.hooks.run('publish.single', { context, _id });
       // return the found cursor
-      return self.find(result._id);
+      return {
+        find() {
+          return self.find(result._id);
+        },
+        children: self._getPubsChildren()
+      };
     });
   }
 }

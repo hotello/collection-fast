@@ -28,7 +28,9 @@
   {{#if loading}}
     <p>Loading...</p>
   {{/if}}
-  <button class="js-load-more">Load more...</button>
+  {{#if hasMore}}
+    <button class="js-load-more">Load more...</button>
+  {{/if}}
 </template>
 
 <template name="Posts_item_container">
