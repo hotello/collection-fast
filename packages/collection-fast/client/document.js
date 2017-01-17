@@ -17,8 +17,13 @@ Template.Document.onCreated(function() {
   });
 });
 Template.Document.helpers({
-  document() {
+  documentArgs(documentId) {
     const instance = Template.instance();
-    return instance.getCollection().findOne(instance.getDocumentId());
+    const document = instance.getCollection().findOne(documentId);
+    return {
+      document: document,
+      noResults: instance.subscriptionsReady() && !document,
+      loading: !instance.subscriptionsReady()
+    };
   }
 });

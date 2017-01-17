@@ -197,7 +197,12 @@ export class CollectionFast extends Mongo.Collection {
 
   // setup publications children
   setPubsChildren(pubsChildren) {
-    this.pubsChildren = pubsChildren;
+    if (Meteor.isServer) {
+      this.pubsChildren = pubsChildren;
+    } else {
+      throw new Meteor.Error('collectionFast.setPubsChildren',
+        'You must set publications children on server.');
+    }
   }
    // setup queries for publications
    _setupQueries(queries = {}) {
@@ -205,7 +210,7 @@ export class CollectionFast extends Mongo.Collection {
    }
    // get current publications children
    _getPubsChildren() {
-     return this.pubsChildren ;
+     return this.pubsChildren;
    }
    // setup publications
   _setupPublications() {

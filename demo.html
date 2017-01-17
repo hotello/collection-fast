@@ -3,7 +3,9 @@
   <h2>Add a post!</h2>
   {{> Posts_form_insert}}
   <h2>Last post</h2>
-  {{> Posts_item_container}}
+  {{#if Template.subscriptionsReady}}
+    {{> Posts_item_container randomPostId=randomPostId}}
+  {{/if}}
   <h2>Latest posts</h2>
   {{> Posts_list_container}}
 </body>
@@ -34,16 +36,26 @@
 </template>
 
 <template name="Posts_item_container">
-  {{#if Template.subscriptionsReady}}
-    {{#Document collection=posts documentId=randomPostId}}
-      {{> Posts_item post=document}}
-    {{/Document}}
-  {{/if}}
+  {{#Document collection=posts documentId=randomPostId}}
+    {{> Posts_item documentArgs}}
+  {{/Document}}
 </template>
 
 <template name="Posts_item">
-  <h4>{{post.title}}</h4>
-  <p>{{post.body}}</p>
-  <strong>You can edit it!</strong>
-  {{> Form_update collection=posts documentId=post._id}}
+  {{#if document}}
+    <h4>{{document.title}}</h4>
+    <p>{{document.body}}</p>
+    <strong>You can edit it!</strong>
+    {{> Form_update collection=posts documentId=document._id}}
+    <strong>Get some related comments</strong>
+    {{#each comment in document.comments}}
+      <p>{{comment.body}}</p>
+    {{/each}}
+  {{/if}}
+  {{#if loading}}
+    <p>Loading the post...</p>
+  {{/if}}
+  {{#if noResults}}
+    <p>Post not found :(</p>
+  {{/if}}
 </template>

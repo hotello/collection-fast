@@ -10,6 +10,20 @@ const Posts = new CollectionFast('posts', {
   pickForMethods: ['title', 'body']
 });
 
+const Comments = new CollectionFast('comments', {
+  schema: {
+    body: {type: String},
+    postId: {type: String}
+  },
+  pickForMethods: ['body']
+});
+
+Posts.helpers({
+  comments() {
+    return Comments.find({postId: this._id});
+  }
+});
+
 Posts.queries.set({
   'posts.all': function(params) {
     return {selector: {}, options: {limit: params.limit}};
@@ -17,9 +31,18 @@ Posts.queries.set({
 });
 
 if (Meteor.isServer) {
+  Posts.setPubsChildren([{
+    find(post) {
+      return Comments.find({ postId: post._id });
+    }
+  }]);
+
   if (!Posts.findOne()) {
     _.times(20, () => {
-      Posts.insert({title: 'Hello World!', body: 'I\'m a post.'});
+      const postId = Posts.insert({title: 'Hello World!', body: 'I\'m a post.'});
+      _.times(2, () => {
+        Comments.insert({body: 'I\'m a comment!', postId: postId});
+      })
     });
   }
 
@@ -32,6 +55,13 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
   import { Template } from 'meteor/templating';
   import './demo.html';
+
+  Template.body.onCreated(function() {
+    this.subscribe('posts.random');
+  });
+  Template.body.helpers({
+    randomPostId: () => Posts.findOne()._id
+  });
 
   Template.Posts_list_container.helpers({
     posts: () => Posts,
@@ -50,11 +80,6 @@ if (Meteor.isClient) {
     posts: () => Posts
   });
 
-  Template.Posts_item_container.onCreated(function() {
-    this.autorun(() => {
-      this.subscribe('posts.random');
-    });
-  });
   Template.Posts_item_container.helpers({
     posts: () => Posts,
     randomPostId: () => Posts.findOne()._id
