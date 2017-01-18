@@ -240,7 +240,14 @@ export class CollectionFast extends Mongo.Collection {
       query = queryFn(result.params);
       // publish counts
       countId = `${collectionName}.byQuery.${name}.${JSON.stringify(params)}`;
-      Counts.publish(this, countId, self.find(), { noReady: true });
+      Counts.publish(
+        this, countId,
+        self.find(
+          query.selector,
+          query.options
+        ),
+        { noReady: true }
+      );
       // return the constructor for publish composite
       return {
         find() {
