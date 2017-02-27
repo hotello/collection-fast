@@ -185,15 +185,39 @@ describe('publications', function() {
       const documentTwo = Factory.create('document');
       const test = Factory.create('test', {documentId: documentOne._id});
 
-      Documents.hooks.add('publish.single', function({ context, _id }) {
-        assert.isDefined(context);
-        assert.isString(_id);
-        return { context, _id };
-      });
       collector.collect('documents.single', documentOne._id, (collections) => {
         assert.equal(collections.documents.length, 1);
         assert.equal(collections.documents[0]._id, documentOne._id);
         assert.equal(collections.tests.length, 1);
+        done();
+      });
+    });
+
+    it('checks if hooks on publish.byQuery are working', function(done) {
+      const collector = new PublicationCollector();
+      Documents.hooks.add('publish.byQuery', function({ context, name, params }) {
+        assert.isDefined(context);
+        assert.isString(name);
+        assert.isDefined(params);
+        return false;
+      });
+      // collect publication result with related data
+      collector.collect('documents.byQuery', 'empty', {empty: true}, (collections) => {
+        assert.deepEqual(collections, {});
+        done();
+      });
+    });
+
+    it('checks if hooks on publish.single are working', function(done) {
+      const collector = new PublicationCollector();
+      Documents.hooks.add('publish.single', function({ context, _id }) {
+        assert.isDefined(context);
+        assert.isString(_id);
+        return false;
+      });
+      // collect publication result with related data
+      collector.collect('documents.single', Random.id(), (collections) => {
+        assert.deepEqual(collections, {});
         done();
       });
     });
