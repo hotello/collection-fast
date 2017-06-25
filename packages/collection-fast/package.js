@@ -1,6 +1,6 @@
 Package.describe({
   name: 'hotello:collection-fast',
-  version: '1.4.2',
+  version: '1.5.0',
   // Brief, one-line summary of the package.
   summary: 'Methods, publications, forms and smart components in seconds.',
   // URL to the Git repository containing the source code for this package.
@@ -11,26 +11,22 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.4.2.3');
+  api.versionsFrom('1.4');
   api.use([
-    'meteor-base@1.0.4',
-    'mongo@1.1.14',
-    'blaze-html-templates@1.0.5',
-    'reactive-var@1.0.11',
-    'reactive-dict@1.1.8',
-    'jquery@1.11.10',
-    'tracker@1.1.1',
-    'es5-shim@4.6.15',
-    'ecmascript@0.6.1',
+    'meteor-base@1.0.0',
+    'mongo@1.0.0',
+    'blaze-html-templates@1.0.0',
+    'reactive-dict@1.0.0',
+    'ecmascript@0.8.0',
 
-    'aldeed:simple-schema@1.5.3',
-    'aldeed:collection2@2.10.0',
-    'aldeed:autoform@5.8.1',
-    'mdg:validated-method@1.1.0',
-    'reywood:publish-composite@1.4.2',
+    'aldeed:simple-schema@1.0.0',
+    'aldeed:collection2@2.0.0',
+    'aldeed:autoform@5.0.0',
+    'mdg:validated-method@1.0.0',
+    'reywood:publish-composite@1.0.0',
     'tmeasday:publish-counts@0.8.0',
 
-    'hotello:useful-dicts@1.0.1'
+    'hotello:useful-dicts@1.0.0'
   ]);
   api.mainModule('collection-fast.js');
   api.addFiles('client/index.js', 'client');
@@ -38,10 +34,10 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   api.use([
-    'ecmascript@0.6.1',
-    'practicalmeteor:mocha@2.4.5_6',
-    'dburles:factory@1.1.0',
-    'johanbrook:publication-collector@1.0.5'
+    'ecmascript@0.8.0',
+    'practicalmeteor:mocha@2.0.0',
+    'dburles:factory@1.0.0',
+    'johanbrook:publication-collector@1.0.0'
   ]);
   api.use('hotello:collection-fast');
   api.mainModule('collection-fast-tests.js');

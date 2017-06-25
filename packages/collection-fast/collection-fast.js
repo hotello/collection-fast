@@ -233,7 +233,7 @@ export class CollectionFast extends Mongo.Collection {
       // run hooks
       result = self.hooks.run('publish.byQuery', { context, name, params });
       // prevent to go on if result is not right
-      if (!_.has(result, 'params')) return this.ready();
+      if (!result || !_.has(result, 'params')) return this.ready();
       // get the query from the queries dict; if we define the query on the server
       // we can exclude malicious queries, we use a function to integrate dynamic data
       // from the publication.
@@ -268,7 +268,7 @@ export class CollectionFast extends Mongo.Collection {
       // run hooks
       const result = self.hooks.run('publish.single', { context, _id });
       // prevent to go on if result is not right
-      if (!_.has(result, '_id')) return this.ready();
+      if (!result || !_.has(result, '_id')) return this.ready();
       // return the found cursor
       return {
         find() {
