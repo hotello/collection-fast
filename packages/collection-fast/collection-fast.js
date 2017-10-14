@@ -243,10 +243,12 @@ export class CollectionFast extends Mongo.Collection {
       // publish counts
       countId = `${collectionName}.byQuery.${name}.${JSON.stringify(params)}`;
       Counts.publish(
-        this, countId,
+        this,
+        countId,
         self.find(
           query.selector,
-          query.options
+          // omit unnecessary fields, fields option interferes with publish-counts
+          _.pick(query.options, 'skip', 'limit')
         ),
         { noReady: true }
       );

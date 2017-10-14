@@ -167,9 +167,9 @@ describe('publications', function() {
       const documentOne = Factory.create('document');
       const test = Factory.create('test', {documentId: documentOne._id});
       const params = {_id: documentOne._id};
-      // a query with related data
+      // a query with related data and fields option (interferes with publish-counts)
       Documents.queries.set({'testQuery': function(params) {
-        return {selector: {_id: params._id}, options: {limit: 1}};
+        return {selector: {_id: params._id}, options: {limit: 1, fields: {field1: 1}}};
       }});
       // collect publication result with related data
       collector.collect('documents.byQuery', 'testQuery', params, (collections) => {
