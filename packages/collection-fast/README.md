@@ -112,7 +112,7 @@ Meteor.subscribe('posts.byQuery', 'all', params);
 To use the latter you must define one ore more queries, both on client and server. Queries are a nice way of putting the Mongo query code both on client and server, so the publication will use a query defined on the server, in a safe way. At the same time the client will get exactly what it asked for. You could even *validate* those *params* with SimpleSchema.
 ```js
 Posts.queries.set({
-  'all': function(params) {
+  'all': function(params, userId) {
     return {selector: {}, options: {limit: params.limit}};
   }
 });
