@@ -25,7 +25,7 @@ Posts.helpers({
 });
 
 Posts.queries.set({
-  'posts.all': function(params) {
+  'posts.all': function(params, userId) {
     return {selector: {}, options: {limit: params.limit}};
   }
 });

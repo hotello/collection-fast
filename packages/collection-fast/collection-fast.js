@@ -239,7 +239,7 @@ export class CollectionFast extends Mongo.Collection {
       // from the publication.
       queryFn = self.queries.get(name);
       // run query function to get the actual query with params got from result
-      query = queryFn(result.params);
+      query = queryFn(result.params, this.userId);
       // publish counts
       countId = `${collectionName}.byQuery.${name}.${JSON.stringify(params)}`;
       Counts.publish(

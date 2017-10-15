@@ -24,8 +24,9 @@ Template.List.onCreated(function() {
   }
   // get cursor results
   this.getCursor = (queryInput) => {
+    const userId = Meteor.userId ? Meteor.userId() : null;
     const queryFn = this.getCollection().queries.get(queryInput.name);
-    const query = queryFn(queryInput.params);
+    const query = queryFn(queryInput.params, userId);
     const collection = this.getCollection();
     return collection.find(query.selector, query.options);
   };
